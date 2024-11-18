@@ -1,8 +1,8 @@
 import ThemedButton from "@/components/ThemedButton"
 import ThemedTextInput from "@/components/ThemedTextInput"
 import {useAppDispatch, useAppSelector} from "@/redux/store"
-import {login, logout, verifyToken} from "@/redux/user/userSlice"
-import {useState} from "react"
+import {login, logout, refreshToken, verifyToken} from "@/redux/user/userSlice"
+import {useEffect, useState} from "react"
 import {Text} from "react-native"
 import base64 from "react-native-base64"
 
@@ -12,6 +12,17 @@ const Login = () => {
 
 	const currentUser = useAppSelector((state) => state.user)
 	const dispatch = useAppDispatch()
+
+	useEffect(() => {
+		if (currentUser.status.code == 401) {
+			dispatch(
+				refreshToken({
+					sub: currentUser.Attributes.sub,
+					refreshToken: currentUser.AuthenticationResult.RefreshToken,
+				})
+			)
+		}
+	}, [currentUser])
 
 	const onLogin = () => {
 		dispatch(
@@ -29,8 +40,8 @@ const Login = () => {
 	const onVerify = () => {
 		dispatch(
 			verifyToken({
-				token: currentUser.accessToken,
-				tokenType: currentUser.tokenType,
+				token: currentUser.AuthenticationResult.AccessToken,
+				tokenType: currentUser.AuthenticationResult.TokenType,
 			})
 		)
 	}
@@ -56,7 +67,7 @@ const Login = () => {
 			<ThemedButton onPress={onLogin} title='Login' />
 			<ThemedButton onPress={onLogout} title='Logout' />
 
-			{currentUser.accessToken.length > 0 && (
+			{currentUser.AuthenticationResult.AccessToken.length > 0 && (
 				<>
 					<ThemedButton onPress={onVerify} title='Verify' />
 					<Text>Message: {currentUser.status.message}</Text>
