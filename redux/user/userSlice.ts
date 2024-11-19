@@ -1,8 +1,8 @@
-import {LOGIN_URL, REFRESH_URL, VERIFY_URL} from "@/api/constants"
+import {LOGIN_URL, REFRESH_URL, SIGN_UP_URL, VERIFY_URL} from "@/api/constants"
 import {AuthGenericResponse, AuthResponse, GenericResponse} from "@/api/types"
 import {createAsyncThunk, createSlice} from "@reduxjs/toolkit"
 import axios, {AxiosError} from "axios"
-import {createAppAsyncThunk} from "../store"
+import base64 from "react-native-base64"
 
 export type UserState = AuthResponse & {
 	status: {
@@ -46,7 +46,7 @@ export const login = createAsyncThunk(
 			const response = await axios.post<AuthGenericResponse>(
 				LOGIN_URL,
 				{email},
-				{headers: {password}}
+				{headers: {password: base64.encode(password)}}
 			)
 			return response.data
 		} catch (e) {
@@ -108,6 +108,9 @@ export const userSlice = createSlice({
 		},
 	},
 	extraReducers: (builder) => {
+		/**
+		 * Login
+		 */
 		builder
 			.addCase(login.pending, (state) => {
 				state.status = {
@@ -149,6 +152,9 @@ export const userSlice = createSlice({
 				}
 			})
 
+		/**
+		 * Verify Token
+		 */
 		builder
 			.addCase(verifyToken.pending, (state) => {
 				state.status = {
@@ -173,6 +179,9 @@ export const userSlice = createSlice({
 				}
 			})
 
+		/**
+		 * Refresh Token
+		 */
 		builder
 			.addCase(refreshToken.pending, (state) => {
 				state.status = {
@@ -200,8 +209,10 @@ export const userSlice = createSlice({
 						type: "fulfilled",
 					}
 					state.$metadata = authResponse.$metadata
-					state.AuthenticationResult =
-						authResponse.AuthenticationResult
+					state.AuthenticationResult = {
+						...authResponse.AuthenticationResult,
+						RefreshToken: state.AuthenticationResult.RefreshToken,
+					}
 				}
 			})
 			.addCase(refreshToken.rejected, (state, action) => {

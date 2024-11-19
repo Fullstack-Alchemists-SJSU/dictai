@@ -1,10 +1,11 @@
+import {ScreenHeader} from "@/components/ScreenHeader"
 import ThemedButton from "@/components/ThemedButton"
 import ThemedTextInput from "@/components/ThemedTextInput"
 import {useAppDispatch, useAppSelector} from "@/redux/store"
 import {login, logout, refreshToken, verifyToken} from "@/redux/user/userSlice"
+import {Link} from "expo-router"
 import {useEffect, useState} from "react"
 import {Text} from "react-native"
-import base64 from "react-native-base64"
 
 const Login = () => {
 	const [email, setEmail] = useState("")
@@ -28,7 +29,7 @@ const Login = () => {
 		dispatch(
 			login({
 				email,
-				password: base64.encode(password),
+				password,
 			})
 		)
 	}
@@ -45,8 +46,18 @@ const Login = () => {
 			})
 		)
 	}
+
+	const onRefresh = () => {
+		dispatch(
+			refreshToken({
+				sub: currentUser.Attributes.sub,
+				refreshToken: currentUser.AuthenticationResult.RefreshToken,
+			})
+		)
+	}
 	return (
 		<>
+			<ScreenHeader title='Login' />
 			<Text>Login screen asd</Text>
 			<ThemedTextInput
 				placeholder='Enter your email'
@@ -70,9 +81,14 @@ const Login = () => {
 			{currentUser.AuthenticationResult.AccessToken.length > 0 && (
 				<>
 					<ThemedButton onPress={onVerify} title='Verify' />
+					<ThemedButton onPress={onRefresh} title='Refresh' />
 					<Text>Message: {currentUser.status.message}</Text>
 				</>
 			)}
+
+			<Text>
+				Don't have an account? <Link href='/register'>Sign Up</Link>
+			</Text>
 		</>
 	)
 }

@@ -1,8 +1,4 @@
-import {
-	combineReducers,
-	configureStore,
-	createAsyncThunk,
-} from "@reduxjs/toolkit"
+import {combineReducers, configureStore} from "@reduxjs/toolkit"
 import userReducer from "../redux/user/userSlice"
 import {useDispatch, useSelector} from "react-redux"
 import AsyncStorage from "@react-native-async-storage/async-storage"
@@ -32,7 +28,3 @@ export type AppThunk = (dispatch: AppDispatch, state: RootState) => void
 
 export const useAppDispatch = useDispatch.withTypes<AppDispatch>()
 export const useAppSelector = useSelector.withTypes<RootState>()
-export const createAppAsyncThunk = createAsyncThunk.withTypes<{
-	state: RootState
-	dispatch: AppDispatch
-}>()

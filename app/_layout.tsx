@@ -39,11 +39,7 @@ export default function RootLayout() {
 			<PersistGate loading={null} persistor={persistor}>
 				<ThemeProvider
 					value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-					{/* <Stack initialRouteName='login'>
-				<Stack.Screen name='login' />
-				<Stack.Screen name='+not-found' />
-			</Stack> */}
-					<Login />
+					<Stack />
 				</ThemeProvider>
 			</PersistGate>
 		</Provider>
