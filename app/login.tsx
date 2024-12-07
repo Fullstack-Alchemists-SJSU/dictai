@@ -1,11 +1,11 @@
+import Container from "@/components/Container"
 import {ScreenHeader} from "@/components/ScreenHeader"
-import ThemedButton from "@/components/ThemedButton"
-import ThemedTextInput from "@/components/ThemedTextInput"
 import {useAppDispatch, useAppSelector} from "@/redux/store"
 import {login, logout, refreshToken, verifyToken} from "@/redux/user/userSlice"
 import {Link} from "expo-router"
 import {useEffect, useState} from "react"
 import {Text} from "react-native"
+import {Button, TextInput} from "react-native-paper"
 
 const Login = () => {
 	const [email, setEmail] = useState("")
@@ -56,40 +56,40 @@ const Login = () => {
 		)
 	}
 	return (
-		<>
-			<ScreenHeader title='Login' />
-			<Text>Login screen asd</Text>
-			<ThemedTextInput
-				placeholder='Enter your email'
+		<Container>
+			<TextInput
+				label='Enter your email'
 				value={email}
 				onChangeText={setEmail}
 				inputMode='email'
 				textContentType='emailAddress'
 			/>
 
-			<ThemedTextInput
-				placeholder='Enter your password'
+			<TextInput
+				label='Enter your password'
 				value={password}
 				onChangeText={setPassword}
 				textContentType='password'
 				secureTextEntry
 			/>
 
-			<ThemedButton onPress={onLogin} title='Login' />
-			<ThemedButton onPress={onLogout} title='Logout' />
+			<Button onPress={onLogin}>Login</Button>
+			<Button onPress={onLogout}>Logout</Button>
 
-			{currentUser.AuthenticationResult.AccessToken.length > 0 && (
-				<>
-					<ThemedButton onPress={onVerify} title='Verify' />
-					<ThemedButton onPress={onRefresh} title='Refresh' />
-					<Text>Message: {currentUser.status.message}</Text>
-				</>
-			)}
+			{currentUser &&
+				currentUser.AuthenticationResult &&
+				currentUser.AuthenticationResult.AccessToken.length > 0 && (
+					<>
+						<Button onPress={onVerify}>Verify</Button>
+						<Button onPress={onRefresh}>Refresh</Button>
+						<Text>Message: {currentUser.status.message}</Text>
+					</>
+				)}
 
 			<Text>
 				Don't have an account? <Link href='/register'>Sign Up</Link>
 			</Text>
-		</>
+		</Container>
 	)
 }
 

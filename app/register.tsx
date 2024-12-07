@@ -1,17 +1,25 @@
 import {SIGN_UP_URL} from "@/api/constants"
 import {GenericResponse} from "@/api/types"
 import {ScreenHeader} from "@/components/ScreenHeader"
-import ThemedButton from "@/components/ThemedButton"
-import ThemedTextInput from "@/components/ThemedTextInput"
 import axios, {AxiosError} from "axios"
 import {useRouter} from "expo-router"
 import {useEffect, useState} from "react"
-import {Modal} from "react-native"
+import {Modal, View} from "react-native"
 import DateTimePicker from "react-native-ui-datepicker"
 import base64 from "react-native-base64"
+import ThemedInput from "@/components/ThemedInput"
+import ThemedButton from "@/components/ThemedButton"
+import {List, RadioButton, Text, useTheme} from "react-native-paper"
+import Container from "@/components/Container"
+import {ThemedHeader, ThemedSubtitle} from "@/components/ThemedText"
+import useDevice from "@/hooks/useDevice"
+import Spacer from "@/components/Spacer"
+import Dropdown, {IOption} from "@/components/Dropdown"
+import theme from "@/constants/Theme"
 
 const Register = () => {
 	const router = useRouter()
+	const dimension = useDevice()
 
 	const [givenName, setGivenName] = useState("")
 	const [lastName, setLastName] = useState("")
@@ -84,72 +92,99 @@ const Register = () => {
 	}
 
 	return (
-		<>
-			<ScreenHeader title='Register' />
-			<ThemedTextInput
-				placeholder='Given Name'
+		<Container>
+			<Spacer direction='vertical' size={24} />
+			<ThemedHeader dimension={dimension} text='Create Account' />
+			<ThemedSubtitle
+				dimension={dimension}
+				text='Your voice, your story, your journey.'
+				color={theme.colors.subtitle}
+			/>
+
+			<Spacer direction='vertical' size={32} />
+
+			<ThemedInput
+				label='Given Name'
 				value={givenName}
 				onChangeText={setGivenName}
 				inputMode='text'
-				textContentType='givenName'
 			/>
 
-			<ThemedTextInput
-				placeholder='Family Name'
+			<ThemedInput
+				label='Family Name'
 				value={lastName}
 				onChangeText={setLastName}
 				inputMode='text'
-				textContentType='familyName'
 			/>
-			<ThemedTextInput
-				placeholder='Email'
+			<ThemedInput
+				label='Email'
 				value={email}
 				onChangeText={setEmail}
 				inputMode='email'
-				textContentType='emailAddress'
 			/>
 
-			<ThemedTextInput
-				placeholder='Phone'
+			<ThemedInput
+				label='Phone'
 				value={phoneNumber}
 				onChangeText={setPhone}
-				textContentType='telephoneNumber'
 			/>
 
-			<ThemedTextInput
-				placeholder='Password'
+			<ThemedInput
+				label='Password'
 				value={password}
 				onChangeText={setPassword}
-				textContentType='password'
-				secureTextEntry
+				secured
 			/>
 
-			<ThemedTextInput
-				placeholder='Confirm password'
+			<ThemedInput
+				label='Confirm password'
 				value={confirmPassword}
 				onChangeText={setConfirmPassword}
-				textContentType='password'
-				secureTextEntry
+				secured
 			/>
 
 			<Modal visible={datePickerVisible}>
-				<ThemedButton title='Close' onPress={onSelectBirthdate} />
-				<DateTimePicker mode='single' onChange={onDateChange} />
+				<View style={{marginHorizontal: 16}}>
+					<DateTimePicker mode='single' onChange={onDateChange} />
+					<ThemedButton
+						onPress={onSelectBirthdate}
+						text='Close'
+						mode='outlined'
+						textColor='black'
+					/>
+				</View>
 			</Modal>
 
 			<ThemedButton
-				title='Select birthdate'
 				onPress={onSelectBirthdate}
+				text={birthdate.length == 0 ? "Select birthdate" : birthdate}
+				mode='outlined'
+				textAlign='left'
+				textColor='black'
 			/>
+			<Dropdown
+				dimension={dimension}
+				options={[
+					{text: "Male", value: "male"},
+					{text: "Female", value: "female"},
+				]}
+				onOptionSelected={(option: IOption) => {
+					setGender(option.value)
+				}}
+			/>
+			<ThemedButton onPress={onRegister} text='Create Account' />
 
-			<select value={gender} onChange={onGenderChange}>
-				<option value='select'>Select</option>
-				<option value='male'>Male</option>
-				<option value='female'>Female</option>
-			</select>
+			<Spacer direction='vertical' size={16} />
 
-			<ThemedButton title='Sign Up' onPress={onRegister} />
-		</>
+			<Text style={{textAlign: "center"}}>
+				Already have an account{" "}
+				<Text
+					style={{fontWeight: "bold", color: theme.colors.primary}}
+					onPress={() => router.push("/login")}>
+					Login
+				</Text>
+			</Text>
+		</Container>
 	)
 }
 

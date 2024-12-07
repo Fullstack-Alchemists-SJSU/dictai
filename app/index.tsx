@@ -1,5 +1,5 @@
-import {Redirect, Stack} from "expo-router"
+import {Redirect} from "expo-router"
 
 export default function Page() {
-	return <Redirect href='/login' />
+	return <Redirect href='/welcome' />
 }

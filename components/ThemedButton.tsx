@@ -1,62 +1,36 @@
-import {useThemeColor} from "@/hooks/useThemeColor"
-import {Button, ButtonProps, Pressable, StyleSheet, Text} from "react-native"
+import {GestureResponderEvent} from "react-native"
+import {Button, Text} from "react-native-paper"
 
-export type ThemedButtonProps = ButtonProps & {
-	lightColor?: string
-	darkColor?: string
-	type?: "normal" | "medium" | "large"
+interface IThemedButton {
+	text: string
+	mode?: "text" | "outlined" | "contained" | "elevated" | "contained-tonal"
+	onPress?: ((e: GestureResponderEvent) => void) | undefined
+	textColor?: string
+	textAlign?: "left" | "center" | "right" | "auto" | "justify"
 }
 
-export default function ThemedButton({
-	title,
-	lightColor,
-	darkColor,
-	type = "normal",
-	...rest
-}: ThemedButtonProps) {
-	const color = useThemeColor({light: lightColor, dark: darkColor}, "text")
+const ThemedButton = ({
+	text,
+	mode = "contained",
+	onPress,
+	textColor = "white",
+	textAlign = "center",
+}: IThemedButton) => {
 	return (
-		<Pressable
-			color={color}
-			{...rest}
-			style={
-				type === "normal"
-					? styles.normal
-					: type === "medium"
-					? styles.medium
-					: styles.large
-			}>
-			<Text style={{color: "white"}}>{title}</Text>
-		</Pressable>
+		<Button
+			mode={mode}
+			style={{
+				marginVertical: 16,
+				marginHorizontal: 8,
+				borderRadius: 8,
+			}}
+			textColor={textColor}
+			onPress={onPress}>
+			<Text style={{textAlign: textAlign, flex: 1, color: textColor}}>
+				{text}
+			</Text>
+		</Button>
 	)
 }
 
-const styles = StyleSheet.create({
-	normal: {
-		margin: 8,
-		padding: 2,
-		fontSize: 16,
-		backgroundColor: "black",
-		textAlign: "center",
-		alignContent: "center",
-		alignItems: "center",
-	},
-	medium: {
-		margin: 16,
-		padding: 4,
-		fontSize: 32,
-		backgroundColor: "black",
-		textAlign: "center",
-		alignContent: "center",
-		alignItems: "center",
-	},
-	large: {
-		margin: 32,
-		padding: 6,
-		fontSize: 48,
-		backgroundColor: "black",
-		textAlign: "center",
-		alignContent: "center",
-		alignItems: "center",
-	},
-})
+export default ThemedButton

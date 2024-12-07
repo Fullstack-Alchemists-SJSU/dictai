@@ -1,17 +1,14 @@
-import {DarkTheme, DefaultTheme, ThemeProvider} from "@react-navigation/native"
+import theme from "../constants/Theme"
 import {useFonts} from "expo-font"
 import {Stack} from "expo-router"
 import * as SplashScreen from "expo-splash-screen"
 import {useEffect} from "react"
 import "react-native-reanimated"
-
-import {useColorScheme} from "@/hooks/useColorScheme"
-import {Text} from "react-native"
-import Login from "./login"
 import {Provider} from "react-redux"
 import {store} from "../redux/store"
 import {PersistGate} from "redux-persist/integration/react"
 import {persistStore} from "redux-persist"
+import {PaperProvider} from "react-native-paper"
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync()
@@ -19,7 +16,6 @@ SplashScreen.preventAutoHideAsync()
 let persistor = persistStore(store)
 
 export default function RootLayout() {
-	const colorScheme = useColorScheme()
 	const [loaded] = useFonts({
 		SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
 	})
@@ -37,10 +33,30 @@ export default function RootLayout() {
 	return (
 		<Provider store={store}>
 			<PersistGate loading={null} persistor={persistor}>
-				<ThemeProvider
-					value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-					<Stack />
-				</ThemeProvider>
+				<PaperProvider theme={theme}>
+					<Stack>
+						<Stack.Screen
+							name='welcome'
+							options={{
+								headerShown: false,
+							}}
+						/>
+
+						<Stack.Screen
+							name='register'
+							options={{
+								headerShown: false,
+							}}
+						/>
+
+						<Stack.Screen
+							name='login'
+							options={{
+								headerShown: false,
+							}}
+						/>
+					</Stack>
+				</PaperProvider>
 			</PersistGate>
 		</Provider>
 	)
