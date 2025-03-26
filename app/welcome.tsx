@@ -1,16 +1,15 @@
 import Container from "@/components/Container"
+import Spacer from "@/components/Spacer"
 import ThemedButton from "@/components/ThemedButton"
 import {ThemedHeader, ThemedSubtitle} from "@/components/ThemedText"
-import {header, subtitle} from "@/constants/TextStyle"
 import theme from "@/constants/Theme"
-import useDevice, {ScreenSize} from "@/hooks/useDevice"
+import getWindowDimens, {ScreenSize} from "@/utils/getWindowDimens"
 import {useRouter} from "expo-router"
 import {Image, View} from "react-native"
-import {useTheme} from "react-native-paper"
 const welcome = require("../assets/images/welcome.jpeg")
 
 const Welcome = () => {
-	const dimension = useDevice()
+	const dimension = getWindowDimens()
 	const router = useRouter()
 
 	const onCreateAccount = () => {
@@ -54,6 +53,8 @@ const Welcome = () => {
 				/>
 
 				<ThemedButton onPress={onCreateAccount} text='Create Account' />
+
+				<Spacer direction='vertical' size={16} />
 
 				<ThemedButton
 					onPress={onLogin}
