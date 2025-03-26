@@ -7,7 +7,7 @@ export const header = StyleSheet.create({
 	},
 
 	small: {
-		fontSize: 48,
+		fontSize: 32,
 		fontWeight: "bold",
 	},
 })
@@ -20,9 +20,15 @@ export const subtitle = StyleSheet.create({
 	},
 
 	small: {
-		fontSize: 24,
+		fontSize: 18,
 		fontWeight: "normal",
 		margin: 8,
+	},
+
+	xs: {
+		fontSize: 12,
+		fontWeight: "normal",
+		margin: 4,
 	},
 })
 
