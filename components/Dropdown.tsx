@@ -1,11 +1,10 @@
-import React, { useEffect, useState } from "react"
-import { View, StyleSheet } from "react-native"
-import { Menu, Button, Text } from "react-native-paper"
+import React, {useEffect, useState} from "react"
+import {View, StyleSheet} from "react-native"
+import {Menu, Button, Text} from "react-native-paper"
 import ThemedButton from "./ThemedButton"
 import theme from "@/constants/Theme"
-import { ThemedSubtitle } from "./ThemedText"
-import { ScreenSize } from "@/utils/getWindowDimens"
-import Spacer from "./Spacer"
+import {ThemedSubtitle} from "./ThemedText"
+import {ScreenSize} from "@/hooks/useDevice"
 
 export interface IOption {
 	text: string
@@ -16,15 +15,14 @@ interface IDropdown {
 	dimension: ScreenSize
 	options: IOption[]
 	onOptionSelected: (option: IOption) => void
-	defaultSelection: string
-	label?: string
 }
 
-const Dropdown = ({ dimension, options, onOptionSelected, defaultSelection, label }: IDropdown) => {
+const Dropdown = ({dimension, options, onOptionSelected}: IDropdown) => {
 	const [visible, setVisible] = useState(false)
-	const [selectedOption, setSelectedOption] = useState(defaultSelection ?? "Select")
+	const [selectedOption, setSelectedOption] = useState("Select an option")
 
 	const openMenu = () => {
+		console.log("in openMenu")
 		setVisible(true)
 	}
 	const closeMenu = () => setVisible(false)
@@ -37,6 +35,16 @@ const Dropdown = ({ dimension, options, onOptionSelected, defaultSelection, labe
 
 	const anchor = (
 		<View>
+			<Text
+				style={{
+					...(dimension == ScreenSize.MEDIUM
+						? {fontSize: 32}
+						: {fontSize: 16}),
+					color: "black",
+					marginHorizontal: 8,
+				}}>
+				Gender
+			</Text>
 			<ThemedButton
 				mode='outlined'
 				onPress={openMenu}
@@ -48,7 +56,7 @@ const Dropdown = ({ dimension, options, onOptionSelected, defaultSelection, labe
 	)
 
 	return (
-		<Menu visible={visible} onDismiss={closeMenu} anchor={anchor} anchorPosition="bottom">
+		<Menu visible={visible} onDismiss={closeMenu} anchor={anchor}>
 			{options.map((option: IOption) => (
 				<Menu.Item
 					onPress={() => handleSelect(option)}
