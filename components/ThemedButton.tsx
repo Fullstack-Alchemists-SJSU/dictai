@@ -20,8 +20,9 @@ const ThemedButton = ({
 		<Button
 			mode={mode}
 			style={{
-				marginVertical: 16,
-				marginHorizontal: 8,
+				margin: 0,
+				//marginHorizontal: 8,
+				paddingVertical: 8,
 				borderRadius: 8,
 			}}
 			textColor={textColor}

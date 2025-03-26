@@ -1,4 +1,3 @@
-import {useEffect, useState} from "react"
 import {Dimensions} from "react-native"
 
 export enum ScreenSize {
@@ -15,16 +14,4 @@ const getWindowDimensions = (): ScreenSize => {
 	}
 }
 
-const useDevice = () => {
-	const [dimensions, setDimensions] = useState(getWindowDimensions())
-
-	useEffect(() => {
-		const handleResize = () => {
-			setDimensions(getWindowDimensions())
-		}
-	}, [])
-
-	return dimensions
-}
-
-export default useDevice
+export default getWindowDimensions
