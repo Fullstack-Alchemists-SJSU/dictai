@@ -1,4 +1,5 @@
 import {MD3LightTheme as DefaultTheme} from "react-native-paper"
+import {Section} from "react-native-paper/lib/typescript/components/Drawer/Drawer"
 const theme = {
 	...DefaultTheme,
 	roundness: 8,
