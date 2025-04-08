@@ -20,6 +20,10 @@ const Welcome = () => {
 		router.push("/login")
 	}
 
+	const onVoiceRecordScreen = () => {
+		router.push("/journal")
+	}
+
 	return (
 		<Container>
 			<View
@@ -59,6 +63,13 @@ const Welcome = () => {
 				<ThemedButton
 					onPress={onLogin}
 					text='Login'
+					mode='outlined'
+					textColor='black'
+				/>
+
+				<ThemedButton
+					onPress={onVoiceRecordScreen}
+					text='Try Out Journal'
 					mode='outlined'
 					textColor='black'
 				/>
