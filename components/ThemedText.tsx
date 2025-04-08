@@ -45,3 +45,48 @@ export const ThemedSubtitle = ({
 		</Text>
 	)
 }
+
+// Local Themed Header for Journal Screen
+export const SmallThemedHeader = ({
+    text,
+    color = "black",
+    dimension,
+}: {
+    text: string;
+    color?: string;
+    dimension: ScreenSize;
+}) => {
+    return (
+        <Text
+            style={{
+                fontSize: dimension === ScreenSize.MEDIUM ? 24 : 22, // Smaller font size
+                fontWeight: "bold",
+                textAlign: "center", // Center alignment
+                color,
+            }}>
+            {text}
+        </Text>
+    );
+};
+
+// Local Themed Subtitle for Journal Screen
+export const SmallThemedSubtitle = ({
+    text,
+    color,
+    dimension,
+}: {
+    text: string;
+    color?: string;
+    dimension: ScreenSize;
+}) => {
+    return (
+        <Text
+            style={{
+                fontSize: dimension === ScreenSize.MEDIUM ? 20 : 18, // Smaller font size
+                textAlign: "center", // Center alignment
+				color,
+            }}>
+            {text}
+        </Text>
+    );
+};
