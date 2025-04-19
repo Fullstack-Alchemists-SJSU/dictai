@@ -24,6 +24,10 @@ const Welcome = () => {
 		router.push("/journal")
 	}
 
+	const onToDosScreen = () => {
+		router.push("/todos")
+	}
+
 	return (
 		<Container>
 			<View
@@ -70,6 +74,13 @@ const Welcome = () => {
 				<ThemedButton
 					onPress={onVoiceRecordScreen}
 					text='Try Out Journal'
+					mode='outlined'
+					textColor='black'
+				/>
+
+				<ThemedButton
+					onPress={onToDosScreen}
+					text='Try Out ToDos'
 					mode='outlined'
 					textColor='black'
 				/>

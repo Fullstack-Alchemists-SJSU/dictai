@@ -55,6 +55,13 @@ export default function RootLayout() {
 								headerShown: false,
 							}}
 						/>
+
+						<Stack.Screen
+							name='todos'
+							options={{
+								headerShown: false,
+							}}
+						/>
 					</Stack>
 				</PaperProvider>
 			</PersistGate>
