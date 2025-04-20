@@ -9,6 +9,7 @@ import theme from "@/constants/Theme"
 const journal = require("../../assets/images/journal.png")
 import { IconButton } from "react-native-paper";
 import { ScreenHeader } from "@/components/ScreenHeader";
+import vapi from "@/vapi/vapi.sdk"
 
 const Journal = () => {
     const dimension = getWindowDimens()
@@ -16,8 +17,14 @@ const Journal = () => {
     const [isRecording, setIsRecording] = useState(false);
     const [audio, setAudio] = useState<string | null>(null);
 
-    const toggleRecording = () => {
-        setIsRecording((prev) => !prev); // Toggle recording state
+    const toggleRecording = async () => {
+        if(!isRecording){
+            await vapi.start("6edb3577-1bf6-4ae5-924a-6966c16f831e")
+            setIsRecording((prev) => !prev); // Toggle recording state
+        }else{
+            vapi.stop()
+            setIsRecording((prev) => !prev); // Toggle recording state
+        }
     };
 
     const handleAudio = (audio: string) => {
