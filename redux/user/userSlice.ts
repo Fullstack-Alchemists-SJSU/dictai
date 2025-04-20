@@ -1,11 +1,20 @@
-import {LOGIN_URL, REFRESH_URL, SIGN_UP_URL, VERIFY_URL} from "@/api/constants"
+import {LOGIN_URL, REFRESH_URL, LOGOUT_URL, VERIFY_URL} from "@/api/constants"
 import {AuthGenericResponse, AuthResponse, GenericResponse} from "@/api/types"
 import {createAsyncThunk, createSlice} from "@reduxjs/toolkit"
 import axios, {AxiosError} from "axios"
 import base64 from "react-native-base64"
 
+export enum Action {
+	DEFAULT = "default",
+	LOGIN = "login",
+	VERIFY = "verify",
+	REFRESH = "refresh",
+	LOGOUT = "logout",
+}
+
 export type UserState = AuthResponse & {
 	status: {
+		action: Action
 		code: number
 		message: string
 		type: "default" | "pending" | "fulfilled" | "rejected"
@@ -24,6 +33,7 @@ const initialState: UserState = {
 		TokenType: "",
 	},
 	status: {
+		action: Action.DEFAULT,
 		code: -1,
 		message: "",
 		type: "default",
@@ -99,13 +109,23 @@ export const refreshToken = createAsyncThunk(
 	}
 )
 
+export const logoutUser = createAsyncThunk("logout", async (token: string) => {
+	try {
+		const response = await axios.post(LOGOUT_URL, {}, {headers: {Authorization: `Bearer ${token}`}})
+		return response.data
+	} catch (e) {
+		console.log(e)
+		if (e instanceof AxiosError) {
+			return {message: e.response?.data.message, statusCode: e.status}
+		}
+		return undefined
+	}
+})
 export const userSlice = createSlice({
 	name: "user",
 	initialState,
 	reducers: {
-		logout: (state) => {
-			return initialState
-		},
+		
 	},
 	extraReducers: (builder) => {
 		/**
@@ -114,6 +134,7 @@ export const userSlice = createSlice({
 		builder
 			.addCase(login.pending, (state) => {
 				state.status = {
+					action: Action.LOGIN,
 					code: -1,
 					message: "",
 					type: "pending",
@@ -124,6 +145,7 @@ export const userSlice = createSlice({
 					return {
 						...initialState,
 						status: (state.status = {
+							action: Action.LOGIN,
 							code: -1,
 							message: "",
 							type: "fulfilled",
@@ -132,6 +154,7 @@ export const userSlice = createSlice({
 				} else {
 					const authResponse = action.payload as AuthResponse
 					state.status = {
+						action: Action.LOGIN,
 						code: authResponse.$metadata.httpStatusCode,
 						message: "Login success",
 						type: "fulfilled",
@@ -146,6 +169,7 @@ export const userSlice = createSlice({
 			.addCase(login.rejected, (state, action) => {
 				const authResponse = action.payload as GenericResponse
 				state.status = {
+					action: Action.LOGIN,
 					code: authResponse.statusCode,
 					message: authResponse.message,
 					type: "rejected",
@@ -158,6 +182,7 @@ export const userSlice = createSlice({
 		builder
 			.addCase(verifyToken.pending, (state) => {
 				state.status = {
+					action: Action.VERIFY,
 					code: -1,
 					message: "",
 					type: "pending",
@@ -165,6 +190,7 @@ export const userSlice = createSlice({
 			})
 			.addCase(verifyToken.fulfilled, (state, action) => {
 				state.status = {
+					action: Action.VERIFY,
 					code: action.payload?.statusCode ?? -1,
 					message: action.payload?.message ?? "",
 					type: "fulfilled",
@@ -173,6 +199,7 @@ export const userSlice = createSlice({
 			.addCase(verifyToken.rejected, (state, action) => {
 				const authResponse = action.payload as GenericResponse
 				state.status = {
+					action: Action.VERIFY,
 					code: authResponse.statusCode,
 					message: authResponse.message,
 					type: "rejected",
@@ -185,6 +212,7 @@ export const userSlice = createSlice({
 		builder
 			.addCase(refreshToken.pending, (state) => {
 				state.status = {
+					action: Action.REFRESH,
 					code: -1,
 					message: "",
 					type: "pending",
@@ -195,6 +223,7 @@ export const userSlice = createSlice({
 					return {
 						...initialState,
 						status: (state.status = {
+							action: Action.REFRESH,
 							code: -1,
 							message: "",
 							type: "fulfilled",
@@ -204,6 +233,7 @@ export const userSlice = createSlice({
 					const authResponse =
 						action.payload as unknown as AuthResponse
 					state.status = {
+						action: Action.REFRESH,
 						code: authResponse.$metadata.httpStatusCode,
 						message: "Token refreshed",
 						type: "fulfilled",
@@ -218,6 +248,37 @@ export const userSlice = createSlice({
 			.addCase(refreshToken.rejected, (state, action) => {
 				const authResponse = action.payload as GenericResponse
 				state.status = {
+					action: Action.REFRESH,
+					code: authResponse.statusCode,
+					message: authResponse.message,
+					type: "rejected",
+				}
+			})
+
+		/**
+		 * Logout
+		 */
+		builder
+			.addCase(logoutUser.pending, (state) => {
+				state.status = {
+					action: Action.LOGOUT,
+					code: -1,
+					message: "",
+					type: "pending",
+				}
+			})
+			.addCase(logoutUser.fulfilled, (state, action) => {
+				state.status = {
+					action: Action.LOGOUT,
+					code: action.payload?.statusCode ?? -1,
+					message: action.payload?.message ?? "",
+					type: "fulfilled",
+				}
+			})
+			.addCase(logoutUser.rejected, (state, action) => {
+				const authResponse = action.payload as GenericResponse
+				state.status = {
+					action: Action.LOGOUT,
 					code: authResponse.statusCode,
 					message: authResponse.message,
 					type: "rejected",
@@ -226,5 +287,4 @@ export const userSlice = createSlice({
 	},
 })
 
-export const {logout} = userSlice.actions
 export default userSlice.reducer

@@ -2,7 +2,7 @@ import { SIGN_UP_URL } from "@/api/constants"
 import { GenericResponse } from "@/api/types"
 import axios, { AxiosError } from "axios"
 import { useRouter } from "expo-router"
-import { useEffect, useState, useRef } from "react"
+import { useState, useRef } from "react"
 import { Modal, ScrollView, View, StyleSheet } from "react-native"
 import DateTimePicker from "react-native-ui-datepicker"
 import base64 from "react-native-base64"
@@ -77,10 +77,6 @@ const Register = () => {
 	const passwordRef = useRef(null)
 	const confirmPasswordRef = useRef(null)
 
-	useEffect(() => {
-		console.log("Gender: ", gender)
-	}, [gender])
-
 	const onSelectBirthdate = () => {
 		setDatePickerVisible(!datePickerVisible)
 	}
@@ -119,7 +115,6 @@ const Register = () => {
 					router.replace("/login")
 				} else {
 					notifyMessage("Something went wrong")
-					console.log("Register response: ", response)
 				}
 			}
 

@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react"
+import {useState} from "react"
 import Container from "@/components/Container"
 import ThemedButton from "@/components/ThemedButton"
 import getWindowDimens, {ScreenSize} from "@/utils/getWindowDimens"

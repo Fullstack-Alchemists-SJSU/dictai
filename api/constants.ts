@@ -4,3 +4,4 @@ export const LOGIN_URL = `${BASE_URL}/auth/login`
 export const SIGN_UP_URL = `${BASE_URL}/auth/register`
 export const VERIFY_URL = `${BASE_URL}/auth/verify`
 export const REFRESH_URL = `${BASE_URL}/auth/refresh`
+export const LOGOUT_URL = `${BASE_URL}/auth/logout`
