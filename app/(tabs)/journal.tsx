@@ -1,29 +1,63 @@
-import {useState} from "react"
+import {useState, useEffect} from "react"
 import Container from "@/components/Container"
 import ThemedButton from "@/components/ThemedButton"
 import getWindowDimens, {ScreenSize} from "@/utils/getWindowDimens"
 import {useRouter} from "expo-router"
-import {Image, View} from "react-native"
+import {Image, View, TouchableOpacity, StyleSheet, ActivityIndicator} from "react-native"
 import {SmallThemedHeader, SmallThemedSubtitle} from "@/components/ThemedText"
 import theme from "@/constants/Theme"
 const journal = require("../../assets/images/journal.png")
 import { IconButton } from "react-native-paper";
 import { ScreenHeader } from "@/components/ScreenHeader";
 import vapi from "@/vapi/vapi.sdk"
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { env } from "@/config/env";
 
 const Journal = () => {
     const dimension = getWindowDimens()
 	const router = useRouter()
     const [isRecording, setIsRecording] = useState(false);
+    const [isConnecting, setIsConnecting] = useState(false);
     const [audio, setAudio] = useState<string | null>(null);
+
+    useEffect(() => {
+        // Listen for call end event
+        const handleCallEnd = () => {
+            setIsRecording(false);
+        };
+
+        // Listen for call start event
+        const handleCallStart = () => {
+            setIsConnecting(false);
+            setIsRecording(true);
+        };
+
+        // Add event listeners
+        vapi.on('call-end', handleCallEnd);
+        vapi.on('call-start', handleCallStart);
+
+        // Cleanup
+        return () => {
+            vapi.off('call-end', handleCallEnd);
+            vapi.off('call-start', handleCallStart);
+        };
+    }, []);
 
     const toggleRecording = async () => {
         if(!isRecording){
-            await vapi.start("6edb3577-1bf6-4ae5-924a-6966c16f831e")
-            setIsRecording((prev) => !prev); // Toggle recording state
-        }else{
-            vapi.stop()
-            setIsRecording((prev) => !prev); // Toggle recording state
+            try {
+                setIsConnecting(true);
+                await vapi.start(env.VAPI_ASSISTANT_ID);
+            } catch (error) {
+                console.error('Failed to start recording:', error);
+                setIsConnecting(false);
+            }
+        } else {
+            try {
+                await vapi.stop();
+            } catch (error) {
+                console.error('Failed to stop recording:', error);
+            }
         }
     };
 
@@ -64,15 +98,23 @@ const Journal = () => {
 					}}
 				/>
 
-
-
-             {/* Mic Button for Recording */}
-             <IconButton
-                    icon={isRecording ? "microphone-off" : "microphone"} // Change icon dynamically
-                    size={40}
-                    onPress={toggleRecording} // Toggle function
-                    style={{ marginTop: 20 }}
-                />
+                {/* Custom Recording Button */}
+                <TouchableOpacity
+                    onPress={toggleRecording}
+                    disabled={isConnecting}
+                    style={[
+                        styles.recordingButton,
+                        isRecording ? styles.stopButton : styles.recordButton
+                    ]}
+                >
+                    {isConnecting ? (
+                        <ActivityIndicator size="large" color="white" />
+                    ) : isRecording ? (
+                        <MaterialCommunityIcons name="stop" size={40} color="white" />
+                    ) : (
+                        <MaterialCommunityIcons name="microphone" size={40} color="white" />
+                    )}
+                </TouchableOpacity>
 
                 <ThemedButton
 					onPress={onJournalScreen}
@@ -91,4 +133,27 @@ const Journal = () => {
     );
     }
 
-    export default Journal;
+const styles = StyleSheet.create({
+    recordingButton: {
+        width: 100,
+        height: 100,
+        borderRadius: 50,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 20,
+        marginBottom: 40,
+        elevation: 5,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+    },
+    recordButton: {
+        backgroundColor: '#2196F3', // Blue color
+    },
+    stopButton: {
+        backgroundColor: '#FF5252', // Red color
+    }
+});
+
+export default Journal;
