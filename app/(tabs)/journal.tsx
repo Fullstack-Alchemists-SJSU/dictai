@@ -6,7 +6,7 @@ import {useRouter} from "expo-router"
 import {Image, View} from "react-native"
 import {SmallThemedHeader, SmallThemedSubtitle} from "@/components/ThemedText"
 import theme from "@/constants/Theme"
-const journal = require("../assets/images/journal.png")
+const journal = require("../../assets/images/journal.png")
 import { IconButton } from "react-native-paper";
 import { ScreenHeader } from "@/components/ScreenHeader";
 
