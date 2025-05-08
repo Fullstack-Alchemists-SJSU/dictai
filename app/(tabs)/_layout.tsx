@@ -25,11 +25,11 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="insights"
+        name="records"
         options={{
-          title: "Insights",
+          title: "Records",
           tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="chart-bar" size={size} color={color} />
+            <MaterialCommunityIcons name="book-open-page-variant" size={size} color={color} />
           ),
         }}
       />
