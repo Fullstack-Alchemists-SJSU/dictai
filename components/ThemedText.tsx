@@ -74,18 +74,27 @@ export const SmallThemedSubtitle = ({
     text,
     color,
     dimension,
+    style,
+    numberOfLines,
 }: {
     text: string;
     color?: string;
     dimension: ScreenSize;
+    style?: any;
+    numberOfLines?: number;
 }) => {
     return (
         <Text
-            style={{
-                fontSize: dimension === ScreenSize.MEDIUM ? 20 : 18, // Smaller font size
-                textAlign: "center", // Center alignment
-				color,
-            }}>
+            style={[
+                {
+                    fontSize: dimension === ScreenSize.MEDIUM ? 20 : 18,
+                    textAlign: "center",
+                    color,
+                },
+                style
+            ]}
+            numberOfLines={numberOfLines}
+        >
             {text}
         </Text>
     );

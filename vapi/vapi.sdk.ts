@@ -1,7 +1,6 @@
 import Vapi from "@vapi-ai/web";
-import { env } from "@/config/env";
 
-const vapi = new Vapi(env.VAPI_API_KEY);
+const vapi = new Vapi("50d99ca3-1ff9-4d2a-a1af-4d142e85f7db");
 
 vapi.on("speech-start", () => {
     console.log("Vapi speech started");
@@ -26,10 +25,10 @@ export const fetchCallLogs = async () => {
         const response = await fetch('https://api.vapi.ai/call', {
             method: 'GET',
             headers: {
-                'Authorization': env.VAPI_PRIVATE_KEY,
+                'Authorization': "1dcc6ff4-1e9e-459b-ac02-219f11e67a16",
                 'Content-Type': 'application/json',
-                'x-vapi-version': env.VAPI_API_VERSION,
-                'x-vapi-organization': env.VAPI_ORG_ID
+                'x-vapi-version': "aaaaf259-ead9-461e-a418-daad075a75a0",
+                'x-vapi-organization': "2024-06-01"
             }
         });
 
@@ -67,10 +66,10 @@ export const fetchCallDetails = async (callId: string) => {
         const response = await fetch(`https://api.vapi.ai/call/${callId}`, {
             method: 'GET',
             headers: {
-                'Authorization': env.VAPI_PRIVATE_KEY,
+                'Authorization': "1dcc6ff4-1e9e-459b-ac02-219f11e67a16",
                 'Content-Type': 'application/json',
-                'x-vapi-version': env.VAPI_API_VERSION,
-                'x-vapi-organization': env.VAPI_ORG_ID
+                'x-vapi-version': "aaaaf259-ead9-461e-a418-daad075a75a0",
+                'x-vapi-organization': "2024-06-01"
             }
         });
 

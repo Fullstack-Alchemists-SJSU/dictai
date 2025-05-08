@@ -37,6 +37,7 @@ const Records = () => {
     const [hasMore, setHasMore] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [initialLoad, setInitialLoad] = useState(true);
+    const [expandedTranscripts, setExpandedTranscripts] = useState<Set<string>>(new Set());
 
     useEffect(() => {
         loadCallLogs();
@@ -175,6 +176,18 @@ const Records = () => {
         }
     };
 
+    const toggleTranscript = (id: string) => {
+        setExpandedTranscripts(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(id)) {
+                newSet.delete(id);
+            } else {
+                newSet.add(id);
+            }
+            return newSet;
+        });
+    };
+
     return (
         <Container>
             <ScreenHeader title="Journal Entries" />
@@ -184,16 +197,6 @@ const Records = () => {
                 label="Search" 
                 value={searchQuery}
                 onChangeText={handleSearch}
-            />
-
-            <Spacer direction="vertical" size={12} />
-
-            {/* Record New Journal Button */}
-            <ThemedButton
-                text="Record New Journal"
-                mode="contained"
-                textColor="white"
-                onPress={() => router.push("/journal")}
             />
 
             <Spacer direction="vertical" size={12} />
@@ -275,12 +278,20 @@ const Records = () => {
                             </View>
 
                             {item.transcript && (
-                                <SmallThemedSubtitle 
-                                    dimension={dimension}
-                                    text={item.transcript}
-                                    numberOfLines={2}
-                                    style={{ marginBottom: 8 }}
-                                />
+                                <TouchableOpacity onPress={() => toggleTranscript(item.id)}>
+                                    <SmallThemedSubtitle 
+                                        dimension={dimension}
+                                        text={item.transcript}
+                                        numberOfLines={expandedTranscripts.has(item.id) ? undefined : 2}
+                                        style={{ marginBottom: 8, textAlign: 'left' }}
+                                    />
+                                    <SmallThemedSubtitle 
+                                        dimension={dimension}
+                                        text={expandedTranscripts.has(item.id) ? "Show less" : "Show more"}
+                                        color="#2196F3"
+                                        style={{ marginTop: 4, textAlign: 'left' }}
+                                    />
+                                </TouchableOpacity>
                             )}
 
                             <View style={{

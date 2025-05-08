@@ -11,7 +11,6 @@ import { IconButton } from "react-native-paper";
 import { ScreenHeader } from "@/components/ScreenHeader";
 import vapi from "@/vapi/vapi.sdk"
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { env } from "@/config/env";
 
 const Journal = () => {
     const dimension = getWindowDimens()
@@ -47,7 +46,7 @@ const Journal = () => {
         if(!isRecording){
             try {
                 setIsConnecting(true);
-                await vapi.start(env.VAPI_ASSISTANT_ID);
+                await vapi.start("6edb3577-1bf6-4ae5-924a-6966c16f831e");
             } catch (error) {
                 console.error('Failed to start recording:', error);
                 setIsConnecting(false);
