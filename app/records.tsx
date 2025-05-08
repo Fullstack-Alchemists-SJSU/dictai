@@ -8,41 +8,26 @@ import {SmallThemedSubtitle}  from "@/components/ThemedText";
 import getWindowDimens, {ScreenSize} from "@/utils/getWindowDimens"
 import ThemedInput from "@/components/ThemedInput";
 import { ScreenHeader } from "@/components/ScreenHeader";
-import { fetchCallLogs, fetchCallDetails } from "@/vapi/vapi.sdk";
 import { useRouter } from "expo-router";
 import { Audio } from 'expo-av';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
-
-interface JournalEntry {
-    id: string;
-    title: string;
-    date: string;
-    duration: number;
-    status: string;
-    audioUrl: string;
-    transcript: string;
-    cost: number;
-    endedReason?: string;
-}
+import { useAppDispatch, useAppSelector } from "@/redux/store";
+import { loadCallLogs, JournalEntry } from "@/redux/callLogs/callLogsSlice";
 
 const Records = () => {
     const dimension = getWindowDimens();
     const router = useRouter();
-    const [entries, setEntries] = useState<JournalEntry[]>([]);
-    const [loading, setLoading] = useState(true);
+    const dispatch = useAppDispatch();
+    const { entries, loading, error, hasMore, page } = useAppSelector(state => state.callLogs);
     const [refreshing, setRefreshing] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const [sound, setSound] = useState<Audio.Sound | null>(null);
     const [currentlyPlaying, setCurrentlyPlaying] = useState<string | null>(null);
-    const [page, setPage] = useState(1);
-    const [hasMore, setHasMore] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const [initialLoad, setInitialLoad] = useState(true);
     const [expandedTranscripts, setExpandedTranscripts] = useState<Set<string>>(new Set());
 
     useEffect(() => {
-        loadCallLogs();
+        dispatch(loadCallLogs({ pageNum: 1 }));
         return () => {
             if (sound) {
                 sound.unloadAsync();
@@ -50,91 +35,21 @@ const Records = () => {
         };
     }, []);
 
-    const loadCallLogs = async (pageNum: number = 1, shouldRefresh: boolean = false) => {
-        try {
-            setError(null);
-            if (shouldRefresh) {
-                setRefreshing(true);
-            } else {
-                setLoading(true);
-            }
-
-            console.log('Fetching call logs...');
-            const calls = await fetchCallLogs();
-            console.log('API Response:', calls);
-            
-            if (!calls) {
-                console.error('No calls data received');
-                throw new Error('No data received from API');
-            }
-
-            // Transform Vapi call data into journal entries
-            const transformedEntries = calls.map((call: any) => {
-                console.log('Processing call:', call);
-                
-                // Calculate duration in seconds
-                const startTime = call.startedAt ? new Date(call.startedAt).getTime() : 0;
-                const endTime = call.endedAt ? new Date(call.endedAt).getTime() : 0;
-                const duration = Math.floor((endTime - startTime) / 1000);
-
-                return {
-                    id: call.id || 'unknown',
-                    title: `Journal Entry - ${new Date(call.createdAt || Date.now()).toLocaleDateString()}`,
-                    date: new Date(call.createdAt || Date.now()).toLocaleDateString(),
-                    duration: duration,
-                    status: call.status || 'unknown',
-                    audioUrl: call.recordingUrl || call.artifact?.recordingUrl || '',
-                    transcript: call.transcript || call.artifact?.transcript || "No transcript available",
-                    cost: call.cost || 0,
-                    endedReason: call.endedReason
-                };
-            });
-
-            console.log('Transformed entries:', transformedEntries);
-
-            // Always replace entries when refreshing or searching
-            if (shouldRefresh || searchQuery) {
-                setEntries(transformedEntries);
-            } else {
-                // Only append new entries when loading more
-                setEntries(prev => {
-                    // Filter out any duplicates by id
-                    const existingIds = new Set(prev.map(entry => entry.id));
-                    const newEntries = transformedEntries.filter((entry: JournalEntry) => !existingIds.has(entry.id));
-                    return [...prev, ...newEntries];
-                });
-            }
-
-            setHasMore(transformedEntries.length > 0);
-            setInitialLoad(false);
-        } catch (error) {
-            console.error('Error loading call logs:', error);
-            setError(error instanceof Error ? error.message : 'Failed to load call logs');
-        } finally {
-            setLoading(false);
-            setRefreshing(false);
-        }
-    };
-
     const onRefresh = () => {
-        setPage(1);
-        loadCallLogs(1, true);
+        setRefreshing(true);
+        dispatch(loadCallLogs({ pageNum: 1, shouldRefresh: true }))
+            .finally(() => setRefreshing(false));
     };
 
     const loadMore = () => {
         if (!loading && hasMore) {
-            setPage(prev => prev + 1);
-            loadCallLogs(page + 1);
+            dispatch(loadCallLogs({ pageNum: page + 1 }));
         }
     };
 
     const handleSearch = (text: string) => {
         setSearchQuery(text);
-        if (text) {
-            loadCallLogs(1, true);
-        } else {
-            loadCallLogs(1, true);
-        }
+        dispatch(loadCallLogs({ pageNum: 1, shouldRefresh: true }));
     };
 
     const filteredEntries = entries.filter(entry => 
@@ -209,6 +124,25 @@ const Records = () => {
                     />
                 </View>
 
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginHorizontal: 16, marginBottom: 16, gap: 16 }}>
+                    <View style={{ flex: 1 }}>
+                        <ThemedButton
+                            text="To-Do List"
+                            mode="outlined"
+                            textColor="black"
+                            onPress={() => router.push("/todos")}
+                        />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                        <ThemedButton
+                            text="Weekly Summary"
+                            mode="outlined"
+                            textColor="black"
+                            onPress={() => router.push("/summary")}
+                        />
+                    </View>
+                </View>
+
                 <Spacer direction="vertical" size={12} />
 
                 {/* Error Message */}
@@ -230,7 +164,7 @@ const Records = () => {
                 )}
 
                 {/* Loading State */}
-                {initialLoad && loading ? (
+                {loading ? (
                     <View style={{ 
                         flex: 1, 
                         justifyContent: 'center', 
@@ -422,7 +356,7 @@ const Records = () => {
                             ) : null
                         }
                         ListFooterComponent={
-                            hasMore && !initialLoad ? (
+                            hasMore ? (
                                 <View style={{ padding: 20, alignItems: 'center' }}>
                                     <ActivityIndicator size="small" color="#2196F3" />
                                 </View>

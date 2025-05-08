@@ -92,7 +92,6 @@ const Welcome = () => {
 					mode='outlined'
 					textColor='black'
 				/>
-
 			</View>
 		</Container>
 	)
