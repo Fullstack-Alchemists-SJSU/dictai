@@ -57,7 +57,7 @@ export default function RootLayout() {
 						/>
 
 						<Stack.Screen
-							name='todos'
+							name='(tabs)'
 							options={{
 								headerShown: false,
 							}}

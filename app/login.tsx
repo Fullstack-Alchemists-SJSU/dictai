@@ -1,15 +1,20 @@
 import Container from "@/components/Container"
-import {ScreenHeader} from "@/components/ScreenHeader"
 import {useAppDispatch, useAppSelector} from "@/redux/store"
 import {login, logout, refreshToken, verifyToken} from "@/redux/user/userSlice"
-import {Link} from "expo-router"
+import {Link, useRouter} from "expo-router"
 import {useEffect, useState} from "react"
-import {Text} from "react-native"
-import {Button, TextInput} from "react-native-paper"
+import {View, StyleSheet} from "react-native"
+import {Text, TextInput, Button} from "react-native-paper"
+import Spacer from "@/components/Spacer"
+import {ThemedHeader, ThemedSubtitle} from "@/components/ThemedText"
+import getWindowDimensions from "@/utils/getWindowDimens"
+import theme from "@/constants/Theme"
 
 const Login = () => {
 	const [email, setEmail] = useState("")
 	const [password, setPassword] = useState("")
+	const router = useRouter()
+	const dimension = getWindowDimensions()
 
 	const currentUser = useAppSelector((state) => state.user)
 	const dispatch = useAppDispatch()
@@ -24,6 +29,12 @@ const Login = () => {
 			)
 		}
 	}, [currentUser])
+
+	useEffect(() => {
+		if (currentUser.status.code === 200) {
+			router.replace("/(tabs)/journal")
+		}
+	}, [currentUser.status.code])
 
 	const onLogin = () => {
 		dispatch(
@@ -55,42 +66,99 @@ const Login = () => {
 			})
 		)
 	}
+
 	return (
 		<Container>
-			<TextInput
-				label='Enter your email'
-				value={email}
-				onChangeText={setEmail}
-				inputMode='email'
-				textContentType='emailAddress'
-			/>
+			<View style={styles.container}>
+				<ThemedHeader dimension={dimension} text='Login' />
+				<ThemedSubtitle
+					dimension={dimension}
+					text='Your voice, your story, your journey.'
+					color={theme.colors.subtitle}
+				/>
 
-			<TextInput
-				label='Enter your password'
-				value={password}
-				onChangeText={setPassword}
-				textContentType='password'
-				secureTextEntry
-			/>
+				<Spacer direction='vertical' size={32} />
 
-			<Button onPress={onLogin}>Login</Button>
-			<Button onPress={onLogout}>Logout</Button>
+				<TextInput
+					label='Email'
+					value={email}
+					onChangeText={setEmail}
+					inputMode='email'
+					textContentType='emailAddress'
+					mode='outlined'
+					style={styles.input}
+					left={<TextInput.Icon icon='email' />}
+				/>
 
-			{currentUser &&
-				currentUser.AuthenticationResult &&
-				currentUser.AuthenticationResult.AccessToken.length > 0 && (
-					<>
-						<Button onPress={onVerify}>Verify</Button>
-						<Button onPress={onRefresh}>Refresh</Button>
-						<Text>Message: {currentUser.status.message}</Text>
-					</>
-				)}
+				<Spacer direction='vertical' size={16} />
 
-			<Text>
-				Don't have an account? <Link href='/register'>Sign Up</Link>
-			</Text>
+				<TextInput
+					label='Password'
+					value={password}
+					onChangeText={setPassword}
+					textContentType='password'
+					secureTextEntry
+					mode='outlined'
+					style={styles.input}
+					left={<TextInput.Icon icon='lock' />}
+					right={<TextInput.Icon icon='eye' />}
+				/>
+
+				<Spacer direction='vertical' size={24} />
+
+				<Button
+					mode='contained'
+					onPress={onLogin}
+					style={styles.button}
+					contentStyle={styles.buttonContent}
+				>
+					Sign In
+				</Button>
+
+				<Spacer direction='vertical' size={16} />
+
+				<View style={styles.footer}>
+					<Text style={styles.footerText}>
+						Don't have an account?{" "}
+						<Link href='/register' style={styles.link}>
+							<Text style={styles.linkText}>Sign Up</Text>
+						</Link>
+					</Text>
+				</View>
+			</View>
 		</Container>
 	)
 }
+
+const styles = StyleSheet.create({
+	container: {
+		flex: 1,
+		padding: 16,
+		justifyContent: "center",
+		alignContent: "center",
+	},
+	input: {
+		backgroundColor: "#fff",
+	},
+	button: {
+		borderRadius: 8,
+	},
+	buttonContent: {
+		paddingVertical: 8,
+	},
+	footer: {
+		alignItems: "center",
+	},
+	footerText: {
+		color: theme.colors.subtitle,
+	},
+	link: {
+		marginLeft: 4,
+	},
+	linkText: {
+		color: theme.colors.primary,
+		fontWeight: "bold",
+	},
+})
 
 export default Login
