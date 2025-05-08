@@ -11,6 +11,8 @@ import { ScreenHeader } from "@/components/ScreenHeader";
 import { fetchCallLogs, fetchCallDetails } from "@/vapi/vapi.sdk";
 import { useRouter } from "expo-router";
 import { Audio } from 'expo-av';
+import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
 
 interface JournalEntry {
     id: string;
@@ -190,171 +192,245 @@ const Records = () => {
 
     return (
         <Container>
-            <ScreenHeader title="Journal Entries" />
+            <LinearGradient
+                colors={['#f8f9fa', '#ffffff']}
+                style={{ flex: 1 }}
+            >
+                <ScreenHeader title="Journal Entries" />
 
-            {/* Search Input */}
-            <ThemedInput 
-                label="Search" 
-                value={searchQuery}
-                onChangeText={handleSearch}
-            />
-
-            <Spacer direction="vertical" size={12} />
-
-            {/* Error Message */}
-            {error && (
-                <View style={{ padding: 10, backgroundColor: '#ffebee', borderRadius: 5, marginBottom: 10 }}>
-                    <SmallThemedSubtitle 
-                        dimension={dimension}
-                        text={error}
-                        color="#d32f2f"
+                {/* Search Bar */}
+                <View style={{ margin: 16 }}>
+                    <ThemedInput 
+                        label="Search entries" 
+                        value={searchQuery}
+                        onChangeText={handleSearch}
+                        mode="outlined"
+                        returnKeyType="search"
                     />
                 </View>
-            )}
 
-            {/* Loading State */}
-            {initialLoad && loading ? (
-                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', marginTop: 20 }}>
-                    <ActivityIndicator size="large" color="#2196F3" />
-                    <SmallThemedSubtitle 
-                        dimension={dimension}
-                        text="Loading your journal entries..."
-                        style={{ marginTop: 10 }}
-                    />
-                </View>
-            ) : (
-                <FlatList
-                    data={filteredEntries}
-                    keyExtractor={(item) => item.id}
-                    renderItem={({ item }) => (
-                        <View style={{
-                            backgroundColor: "#f9f9f9",
-                            padding: 16,
-                            borderRadius: 10,
-                            marginBottom: 12,
-                            shadowColor: "#000",
-                            shadowOffset: { width: 0, height: 2 },
-                            shadowOpacity: 0.1,
-                            shadowRadius: 4,
-                            elevation: 2,
-                        }}>
-                            <View style={{
-                                flexDirection: "row",
-                                justifyContent: "space-between",
-                                alignItems: "center",
-                                marginBottom: 8,
-                            }}>
-                                <SmallThemedSubtitle 
-                                    dimension={dimension}
-                                    text={item.title} 
-                                    style={{ fontWeight: 'bold' }}
-                                />
-                                <SmallThemedSubtitle 
-                                    dimension={dimension}
-                                    text={item.status} 
-                                    color={item.status === 'ended' ? '#4CAF50' : '#FFC107'}
-                                />
-                            </View>
+                <Spacer direction="vertical" size={12} />
 
-                            <View style={{
-                                flexDirection: "row",
-                                alignItems: "center",
-                                marginBottom: 8,
-                            }}>
-                                <Icon name="time-outline" size={16} color="#888" />
-                                <SmallThemedSubtitle 
-                                    dimension={dimension}
-                                    text={`${Math.floor(item.duration / 60)}m ${item.duration % 60}s`}
-                                    style={{ marginLeft: 4 }}
-                                    color="#888"
-                                />
-                                <Icon name="calendar-outline" size={16} color="#888" style={{ marginLeft: 12 }} />
-                                <SmallThemedSubtitle 
-                                    dimension={dimension}
-                                    text={item.date}
-                                    style={{ marginLeft: 4 }}
-                                    color="#888"
-                                />
-                            </View>
-
-                            {item.transcript && (
-                                <TouchableOpacity onPress={() => toggleTranscript(item.id)}>
-                                    <SmallThemedSubtitle 
-                                        dimension={dimension}
-                                        text={item.transcript}
-                                        numberOfLines={expandedTranscripts.has(item.id) ? undefined : 2}
-                                        style={{ marginBottom: 8, textAlign: 'left' }}
-                                    />
-                                    <SmallThemedSubtitle 
-                                        dimension={dimension}
-                                        text={expandedTranscripts.has(item.id) ? "Show less" : "Show more"}
-                                        color="#2196F3"
-                                        style={{ marginTop: 4, textAlign: 'left' }}
-                                    />
-                                </TouchableOpacity>
-                            )}
-
-                            <View style={{
-                                flexDirection: "row",
-                                justifyContent: "space-between",
-                                alignItems: "center",
-                            }}>
-                                <TouchableOpacity 
-                                    onPress={() => handlePlayAudio(item.id, item.audioUrl)}
-                                    disabled={!item.audioUrl}
-                                    style={{
-                                        flexDirection: "row",
-                                        alignItems: "center",
-                                    }}
-                                >
-                                    <Icon 
-                                        name={currentlyPlaying === item.id ? "pause-circle" : "play-circle-outline"} 
-                                        size={24} 
-                                        color={item.audioUrl ? "#2196F3" : "#888"} 
-                                    />
-                                    <SmallThemedSubtitle 
-                                        dimension={dimension}
-                                        text="Play Recording"
-                                        style={{ marginLeft: 4 }}
-                                        color={item.audioUrl ? "#2196F3" : "#888"}
-                                    />
-                                </TouchableOpacity>
-
-                                <SmallThemedSubtitle 
-                                    dimension={dimension}
-                                    text={`Cost: $${item.cost.toFixed(4)}`}
-                                    color="#888"
-                                />
-                            </View>
-                        </View>
-                    )}
-                    refreshControl={
-                        <RefreshControl
-                            refreshing={refreshing}
-                            onRefresh={onRefresh}
-                            colors={['#2196F3']}
+                {/* Error Message */}
+                {error && (
+                    <View style={{ 
+                        margin: 16,
+                        padding: 12,
+                        backgroundColor: 'rgba(211, 47, 47, 0.1)',
+                        borderRadius: 8,
+                        borderLeftWidth: 4,
+                        borderLeftColor: '#d32f2f'
+                    }}>
+                        <SmallThemedSubtitle 
+                            dimension={dimension}
+                            text={error}
+                            color="#d32f2f"
                         />
-                    }
-                    onEndReached={loadMore}
-                    onEndReachedThreshold={0.5}
-                    ListEmptyComponent={
-                        !loading && !refreshing ? (
-                            <View style={{ alignItems: 'center', marginTop: 20 }}>
-                                <SmallThemedSubtitle 
-                                    dimension={dimension}
-                                    text="No journal entries found"
-                                    color="#888"
-                                />
+                    </View>
+                )}
+
+                {/* Loading State */}
+                {initialLoad && loading ? (
+                    <View style={{ 
+                        flex: 1, 
+                        justifyContent: 'center', 
+                        alignItems: 'center', 
+                        marginTop: 20 
+                    }}>
+                        <ActivityIndicator size="large" color="#2196F3" />
+                        <SmallThemedSubtitle 
+                            dimension={dimension}
+                            text="Loading your journal entries..."
+                            style={{ marginTop: 10 }}
+                        />
+                    </View>
+                ) : (
+                    <FlatList
+                        data={filteredEntries}
+                        keyExtractor={(item) => item.id}
+                        contentContainerStyle={{ padding: 16 }}
+                        renderItem={({ item }) => (
+                            <View style={{
+                                backgroundColor: "#ffffff",
+                                padding: 20,
+                                borderRadius: 16,
+                                marginBottom: 16,
+                                shadowColor: "#000",
+                                shadowOffset: { width: 0, height: 4 },
+                                shadowOpacity: 0.1,
+                                shadowRadius: 8,
+                                elevation: 4,
+                                borderWidth: 1,
+                                borderColor: 'rgba(0,0,0,0.05)',
+                            }}>
+                                {/* Header Section */}
+                                <View style={{
+                                    flexDirection: "row",
+                                    justifyContent: "space-between",
+                                    alignItems: "center",
+                                    marginBottom: 12,
+                                }}>
+                                    <SmallThemedSubtitle 
+                                        dimension={dimension}
+                                        text={item.title} 
+                                        style={{ 
+                                            fontWeight: 'bold',
+                                            fontSize: 16,
+                                            textAlign: 'left'
+                                        }}
+                                    />
+                                    <View style={{
+                                        backgroundColor: item.status === 'ended' ? 'rgba(76, 175, 80, 0.1)' : 'rgba(255, 193, 7, 0.1)',
+                                        paddingHorizontal: 12,
+                                        paddingVertical: 6,
+                                        borderRadius: 20,
+                                    }}>
+                                        <SmallThemedSubtitle 
+                                            dimension={dimension}
+                                            text={item.status} 
+                                            color={item.status === 'ended' ? '#4CAF50' : '#FFC107'}
+                                            style={{ textTransform: 'capitalize' }}
+                                        />
+                                    </View>
+                                </View>
+
+                                {/* Metadata Section */}
+                                <View style={{
+                                    flexDirection: "row",
+                                    alignItems: "center",
+                                    marginBottom: 12,
+                                    backgroundColor: '#f8f9fa',
+                                    padding: 12,
+                                    borderRadius: 8,
+                                }}>
+                                    <Icon name="time-outline" size={16} color="#666" />
+                                    <SmallThemedSubtitle 
+                                        dimension={dimension}
+                                        text={`${Math.floor(item.duration / 60)}m ${item.duration % 60}s`}
+                                        style={{ marginLeft: 4, textAlign: 'left' }}
+                                        color="#666"
+                                    />
+                                    <Icon name="calendar-outline" size={16} color="#666" style={{ marginLeft: 12 }} />
+                                    <SmallThemedSubtitle 
+                                        dimension={dimension}
+                                        text={item.date}
+                                        style={{ marginLeft: 4, textAlign: 'left' }}
+                                        color="#666"
+                                    />
+                                </View>
+
+                                {/* Transcript Section */}
+                                {item.transcript && (
+                                    <TouchableOpacity 
+                                        onPress={() => toggleTranscript(item.id)}
+                                        style={{
+                                            backgroundColor: '#f8f9fa',
+                                            padding: 12,
+                                            borderRadius: 8,
+                                            marginBottom: 12,
+                                        }}
+                                    >
+                                        <SmallThemedSubtitle 
+                                            dimension={dimension}
+                                            text={item.transcript}
+                                            numberOfLines={expandedTranscripts.has(item.id) ? undefined : 2}
+                                            style={{ marginBottom: 8, textAlign: 'left' }}
+                                        />
+                                        <SmallThemedSubtitle 
+                                            dimension={dimension}
+                                            text={expandedTranscripts.has(item.id) ? "Show less" : "Show more"}
+                                            color="#2196F3"
+                                            style={{ marginTop: 4, textAlign: 'left' }}
+                                        />
+                                    </TouchableOpacity>
+                                )}
+
+                                {/* Footer Section */}
+                                <View style={{
+                                    flexDirection: "row",
+                                    justifyContent: "space-between",
+                                    alignItems: "center",
+                                    borderTopWidth: 1,
+                                    borderTopColor: '#f0f0f0',
+                                    paddingTop: 12,
+                                }}>
+                                    <TouchableOpacity 
+                                        onPress={() => handlePlayAudio(item.id, item.audioUrl)}
+                                        disabled={!item.audioUrl}
+                                        style={{
+                                            flexDirection: "row",
+                                            alignItems: "center",
+                                            backgroundColor: item.audioUrl ? 'rgba(33, 150, 243, 0.1)' : '#f0f0f0',
+                                            paddingHorizontal: 12,
+                                            paddingVertical: 6,
+                                            borderRadius: 20,
+                                        }}
+                                    >
+                                        <Icon 
+                                            name={currentlyPlaying === item.id ? "pause-circle" : "play-circle-outline"} 
+                                            size={24} 
+                                            color={item.audioUrl ? "#2196F3" : "#888"} 
+                                        />
+                                        <SmallThemedSubtitle 
+                                            dimension={dimension}
+                                            text="Play Recording"
+                                            style={{ marginLeft: 4, textAlign: 'left' }}
+                                            color={item.audioUrl ? "#2196F3" : "#888"}
+                                        />
+                                    </TouchableOpacity>
+
+                                    <View style={{
+                                        backgroundColor: '#f8f9fa',
+                                        paddingHorizontal: 12,
+                                        paddingVertical: 6,
+                                        borderRadius: 20,
+                                    }}>
+                                        <SmallThemedSubtitle 
+                                            dimension={dimension}
+                                            text={`Cost: $${item.cost.toFixed(4)}`}
+                                            color="#666"
+                                        />
+                                    </View>
+                                </View>
                             </View>
-                        ) : null
-                    }
-                    ListFooterComponent={
-                        hasMore && !initialLoad ? (
-                            <ActivityIndicator size="small" color="#2196F3" />
-                        ) : null
-                    }
-                />
-            )}
+                        )}
+                        refreshControl={
+                            <RefreshControl
+                                refreshing={refreshing}
+                                onRefresh={onRefresh}
+                                colors={['#2196F3']}
+                                tintColor="#2196F3"
+                            />
+                        }
+                        onEndReached={loadMore}
+                        onEndReachedThreshold={0.5}
+                        ListEmptyComponent={
+                            !loading && !refreshing ? (
+                                <View style={{ 
+                                    alignItems: 'center', 
+                                    marginTop: 40,
+                                    padding: 20,
+                                }}>
+                                    <Icon name="document-text-outline" size={48} color="#888" />
+                                    <SmallThemedSubtitle 
+                                        dimension={dimension}
+                                        text="No journal entries found"
+                                        color="#888"
+                                        style={{ marginTop: 12 }}
+                                    />
+                                </View>
+                            ) : null
+                        }
+                        ListFooterComponent={
+                            hasMore && !initialLoad ? (
+                                <View style={{ padding: 20, alignItems: 'center' }}>
+                                    <ActivityIndicator size="small" color="#2196F3" />
+                                </View>
+                            ) : null
+                        }
+                    />
+                )}
+            </LinearGradient>
         </Container>
     );
 };
