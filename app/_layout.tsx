@@ -62,6 +62,9 @@ export default function RootLayout() {
 								headerShown: false,
 							}}
 						/>
+
+						
+						
 					</Stack>
 				</PaperProvider>
 			</PersistGate>

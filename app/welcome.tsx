@@ -28,6 +28,9 @@ const Welcome = () => {
 		router.push("/todos")
 	}
 
+	const onSummaryScreen = () => {
+		router.push("/summary")
+	}
 	return (
 		<Container>
 			<View
@@ -81,6 +84,13 @@ const Welcome = () => {
 				<ThemedButton
 					onPress={onToDosScreen}
 					text='Try Out ToDos'
+					mode='outlined'
+					textColor='black'
+				/>
+
+				<ThemedButton
+					onPress={onSummaryScreen}
+					text='Try Out Summary'
 					mode='outlined'
 					textColor='black'
 				/>
