@@ -22,7 +22,7 @@ export default function RootLayout() {
 
 	useEffect(() => {
 		if (loaded) {
-			SplashScreen.hideAsync()
+			SplashScreen.hideAsync()	
 		}
 	}, [loaded])
 
@@ -62,6 +62,9 @@ export default function RootLayout() {
 								headerShown: false,
 							}}
 						/>
+
+						
+						
 					</Stack>
 				</PaperProvider>
 			</PersistGate>

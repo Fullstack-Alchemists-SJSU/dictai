@@ -1,14 +1,16 @@
 import Container from "@/components/Container"
 import {useAppDispatch, useAppSelector} from "@/redux/store"
-import {login, logout, refreshToken, verifyToken} from "@/redux/user/userSlice"
+import {Action, login} from "@/redux/user/userSlice"
 import {Link, useRouter} from "expo-router"
 import {useEffect, useState} from "react"
 import {View, StyleSheet} from "react-native"
-import {Text, TextInput, Button} from "react-native-paper"
+import {Text} from "react-native-paper"
 import Spacer from "@/components/Spacer"
 import {ThemedHeader, ThemedSubtitle} from "@/components/ThemedText"
 import getWindowDimensions from "@/utils/getWindowDimens"
 import theme from "@/constants/Theme"
+import ThemedInput from "@/components/ThemedInput"
+import ThemedButton from "@/components/ThemedButton"
 
 const Login = () => {
 	const [email, setEmail] = useState("")
@@ -16,53 +18,19 @@ const Login = () => {
 	const router = useRouter()
 	const dimension = getWindowDimensions()
 
-	const currentUser = useAppSelector((state) => state.user)
 	const dispatch = useAppDispatch()
-
+	const user = useAppSelector((state) => state.user)
 	useEffect(() => {
-		if (currentUser.status.code == 401) {
-			dispatch(
-				refreshToken({
-					sub: currentUser.Attributes.sub,
-					refreshToken: currentUser.AuthenticationResult.RefreshToken,
-				})
-			)
-		}
-	}, [currentUser])
-
-	useEffect(() => {
-		if (currentUser.status.code === 200) {
+		if (user.status.action === Action.LOGIN && user.status.code === 200) {
 			router.replace("/(tabs)/journal")
 		}
-	}, [currentUser.status.code])
+	}, [user.status])
 
 	const onLogin = () => {
 		dispatch(
 			login({
 				email,
 				password,
-			})
-		)
-	}
-
-	const onLogout = () => {
-		dispatch(logout())
-	}
-
-	const onVerify = () => {
-		dispatch(
-			verifyToken({
-				token: currentUser.AuthenticationResult.AccessToken,
-				tokenType: currentUser.AuthenticationResult.TokenType,
-			})
-		)
-	}
-
-	const onRefresh = () => {
-		dispatch(
-			refreshToken({
-				sub: currentUser.Attributes.sub,
-				refreshToken: currentUser.AuthenticationResult.RefreshToken,
 			})
 		)
 	}
@@ -79,41 +47,28 @@ const Login = () => {
 
 				<Spacer direction='vertical' size={32} />
 
-				<TextInput
+				<ThemedInput
 					label='Email'
 					value={email}
 					onChangeText={setEmail}
 					inputMode='email'
-					textContentType='emailAddress'
-					mode='outlined'
-					style={styles.input}
-					left={<TextInput.Icon icon='email' />}
 				/>
 
 				<Spacer direction='vertical' size={16} />
 
-				<TextInput
+				<ThemedInput
 					label='Password'
 					value={password}
 					onChangeText={setPassword}
-					textContentType='password'
-					secureTextEntry
-					mode='outlined'
-					style={styles.input}
-					left={<TextInput.Icon icon='lock' />}
-					right={<TextInput.Icon icon='eye' />}
+					secured={true}
 				/>
 
 				<Spacer direction='vertical' size={24} />
 
-				<Button
-					mode='contained'
+				<ThemedButton
+					text='Sign In'
 					onPress={onLogin}
-					style={styles.button}
-					contentStyle={styles.buttonContent}
-				>
-					Sign In
-				</Button>
+				/>
 
 				<Spacer direction='vertical' size={16} />
 
@@ -136,15 +91,6 @@ const styles = StyleSheet.create({
 		padding: 16,
 		justifyContent: "center",
 		alignContent: "center",
-	},
-	input: {
-		backgroundColor: "#fff",
-	},
-	button: {
-		borderRadius: 8,
-	},
-	buttonContent: {
-		paddingVertical: 8,
 	},
 	footer: {
 		alignItems: "center",

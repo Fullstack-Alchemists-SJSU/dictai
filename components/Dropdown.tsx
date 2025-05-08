@@ -1,12 +1,9 @@
-import React, { useEffect, useState } from "react"
-import { View, StyleSheet } from "react-native"
-import { Menu, Button, Text } from "react-native-paper"
+import React, { useState } from "react"
+import { View } from "react-native"
+import { Menu } from "react-native-paper"
 import ThemedButton from "./ThemedButton"
 import theme from "@/constants/Theme"
-import { ThemedSubtitle } from "./ThemedText"
 import { ScreenSize } from "@/utils/getWindowDimens"
-import Spacer from "./Spacer"
-
 export interface IOption {
 	text: string
 	value: string
