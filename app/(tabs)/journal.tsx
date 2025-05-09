@@ -1,13 +1,11 @@
 import {useState, useEffect} from "react"
 import Container from "@/components/Container"
-import ThemedButton from "@/components/ThemedButton"
 import getWindowDimens, {ScreenSize} from "@/utils/getWindowDimens"
 import {useRouter} from "expo-router"
 import {Image, View, TouchableOpacity, StyleSheet, ActivityIndicator} from "react-native"
 import {SmallThemedHeader, SmallThemedSubtitle} from "@/components/ThemedText"
 import theme from "@/constants/Theme"
 const journal = require("../../assets/images/journal.png")
-import { IconButton } from "react-native-paper";
 import { ScreenHeader } from "@/components/ScreenHeader";
 import vapi from "@/vapi/vapi.sdk"
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -114,13 +112,6 @@ const Journal = () => {
                         <MaterialCommunityIcons name="microphone" size={40} color="white" />
                     )}
                 </TouchableOpacity>
-
-                <ThemedButton
-					onPress={onJournalScreen}
-					text='See Journal Entries'
-					mode='outlined'
-					textColor='black'
-				/>
 
             </View>
 

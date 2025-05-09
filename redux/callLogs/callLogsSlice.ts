@@ -1,5 +1,8 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { fetchCallLogs } from '@/vapi/vapi.sdk';
+import { createTodo as createTodoAction } from '../todos/todosSlice';
+
+const BASE_URL = "http://10.0.0.162:5002/api/todos/create";
 
 export interface JournalEntry {
     id: string;
@@ -11,6 +14,7 @@ export interface JournalEntry {
     transcript: string;
     cost: number;
     endedReason?: string;
+    todoCreated: boolean;
 }
 
 interface CallLogsState {
@@ -28,6 +32,22 @@ const initialState: CallLogsState = {
     hasMore: true,
     page: 1
 };
+
+export const createTodo = createAsyncThunk(
+    'callLogs/createTodo',
+    async ({ entryId, transcript }: { entryId: string; transcript: string }, { dispatch }) => {
+        try {
+            const result = await dispatch(createTodoAction(transcript)).unwrap();
+            // If we get a response that's not an error message, consider it successful
+            if (!('message' in result)) {
+                return entryId;
+            }
+            throw new Error('Failed to create todo');
+        } catch (error) {
+            throw error instanceof Error ? error.message : 'Failed to create todo';
+        }
+    }
+);
 
 export const loadCallLogs = createAsyncThunk(
     'callLogs/loadCallLogs',
@@ -54,7 +74,8 @@ export const loadCallLogs = createAsyncThunk(
                     audioUrl: call.recordingUrl || call.artifact?.recordingUrl || '',
                     transcript: call.transcript || call.artifact?.transcript || "No transcript available",
                     cost: call.cost || 0,
-                    endedReason: call.endedReason
+                    endedReason: call.endedReason,
+                    todoCreated: false
                 };
             });
 
@@ -107,6 +128,12 @@ const callLogsSlice = createSlice({
             .addCase(loadCallLogs.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.error.message || 'Failed to load call logs';
+            })
+            .addCase(createTodo.fulfilled, (state, action) => {
+                const entry = state.entries.find(entry => entry.id === action.payload);
+                if (entry) {
+                    entry.todoCreated = true;
+                }
             });
     }
 });

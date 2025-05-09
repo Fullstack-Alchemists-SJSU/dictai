@@ -13,7 +13,7 @@ import { Audio } from 'expo-av';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { useAppDispatch, useAppSelector } from "@/redux/store";
-import { loadCallLogs, JournalEntry } from "@/redux/callLogs/callLogsSlice";
+import { loadCallLogs, JournalEntry, createTodo } from "@/redux/callLogs/callLogsSlice";
 
 const Records = () => {
     const dimension = getWindowDimens();
@@ -105,6 +105,14 @@ const Records = () => {
         });
     };
 
+    const handleCreateTodo = async (entryId: string, transcript: string) => {
+        try {
+            await dispatch(createTodo({ entryId, transcript })).unwrap();
+        } catch (error) {
+            console.error('Error creating todo:', error);
+        }
+    };
+
     return (
         <Container>
             <LinearGradient
@@ -127,7 +135,7 @@ const Records = () => {
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginHorizontal: 16, marginBottom: 16, gap: 16 }}>
                     <View style={{ flex: 1 }}>
                         <ThemedButton
-                            text="To-Do List"
+                            text="Show All Todos"
                             mode="outlined"
                             textColor="black"
                             onPress={() => router.push("/todos")}
@@ -288,30 +296,58 @@ const Records = () => {
                                     borderTopColor: '#f0f0f0',
                                     paddingTop: 12,
                                 }}>
-                                    <TouchableOpacity 
-                                        onPress={() => handlePlayAudio(item.id, item.audioUrl)}
-                                        disabled={!item.audioUrl}
-                                        style={{
-                                            flexDirection: "row",
-                                            alignItems: "center",
-                                            backgroundColor: item.audioUrl ? 'rgba(33, 150, 243, 0.1)' : '#f0f0f0',
-                                            paddingHorizontal: 12,
-                                            paddingVertical: 6,
-                                            borderRadius: 20,
-                                        }}
-                                    >
-                                        <Icon 
-                                            name={currentlyPlaying === item.id ? "pause-circle" : "play-circle-outline"} 
-                                            size={24} 
-                                            color={item.audioUrl ? "#2196F3" : "#888"} 
-                                        />
-                                        <SmallThemedSubtitle 
-                                            dimension={dimension}
-                                            text="Play Recording"
-                                            style={{ marginLeft: 4, textAlign: 'left' }}
-                                            color={item.audioUrl ? "#2196F3" : "#888"}
-                                        />
-                                    </TouchableOpacity>
+                                    <View style={{ flexDirection: "row", gap: 8 }}>
+                                        <TouchableOpacity 
+                                            onPress={() => handlePlayAudio(item.id, item.audioUrl)}
+                                            disabled={!item.audioUrl}
+                                            style={{
+                                                flexDirection: "row",
+                                                alignItems: "center",
+                                                backgroundColor: item.audioUrl ? 'rgba(33, 150, 243, 0.1)' : '#f0f0f0',
+                                                paddingHorizontal: 12,
+                                                paddingVertical: 6,
+                                                borderRadius: 20,
+                                            }}
+                                        >
+                                            <Icon 
+                                                name={currentlyPlaying === item.id ? "pause-circle" : "play-circle-outline"} 
+                                                size={24} 
+                                                color={item.audioUrl ? "#2196F3" : "#888"} 
+                                            />
+                                            <SmallThemedSubtitle 
+                                                dimension={dimension}
+                                                text="Play Recording"
+                                                style={{ marginLeft: 4, textAlign: 'left' }}
+                                                color={item.audioUrl ? "#2196F3" : "#888"}
+                                            />
+                                        </TouchableOpacity>
+
+                                        {!item.todoCreated && (
+                                            <TouchableOpacity 
+                                                onPress={() => handleCreateTodo(item.id, item.transcript)}
+                                                style={{
+                                                    flexDirection: "row",
+                                                    alignItems: "center",
+                                                    backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                                                    paddingHorizontal: 12,
+                                                    paddingVertical: 6,
+                                                    borderRadius: 20,
+                                                }}
+                                            >
+                                                <Icon 
+                                                    name="add-circle-outline" 
+                                                    size={24} 
+                                                    color="#4CAF50" 
+                                                />
+                                                <SmallThemedSubtitle 
+                                                    dimension={dimension}
+                                                    text="Create Todo"
+                                                    style={{ marginLeft: 4, textAlign: 'left' }}
+                                                    color="#4CAF50"
+                                                />
+                                            </TouchableOpacity>
+                                        )}
+                                    </View>
 
                                     <View style={{
                                         backgroundColor: '#f8f9fa',

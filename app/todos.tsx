@@ -1,115 +1,206 @@
-import { useState } from "react";
-import Container from "@/components/Container";
-import { View, FlatList } from "react-native";
-import { ScreenHeader } from "@/components/ScreenHeader";
-import getWindowDimens from "@/utils/getWindowDimens";
-import { IconButton } from "react-native-paper";
-import Spacer from "@/components/Spacer";
-import ThemedInput from "@/components/ThemedInput";
-import TodoItem from "@/components/TodoItem";
+import { useEffect } from 'react';
+import { View, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import { useAppDispatch, useAppSelector } from '@/redux/store';
+import { SmallThemedSubtitle } from '@/components/ThemedText';
+import { ScreenHeader } from '@/components/ScreenHeader';
+import Container from '@/components/Container';
+import Icon from 'react-native-vector-icons/Ionicons';
+import getWindowDimens from '@/utils/getWindowDimens';
+import { LinearGradient } from 'expo-linear-gradient';
+import { toggleTodo } from '@/redux/todos/todosSlice';
 
-interface TodoItem {
-  id: string;
-  text: string;
-  completed: boolean;
-  createdAt: string;
-  dueDate?: string;
-  priority: 'low' | 'medium' | 'high';
-}
+const TodosScreen = () => {
+    const dimension = getWindowDimens();
+    const dispatch = useAppDispatch();
+    const { items: todos, loading, error } = useAppSelector(state => state.todos);
 
-const mockTodos: TodoItem[] = [
-  {
-    id: "1",
-    text: "Complete the AI voice journaling feature",
-    completed: false,
-    createdAt: "2024-04-19",
-    dueDate: "2024-04-25",
-    priority: "high"
-  },
-  {
-    id: "2",
-    text: "Review the transcription accuracy",
-    completed: false,
-    createdAt: "2024-04-19",
-    dueDate: "2024-04-22",
-    priority: "medium"
-  },
-  {
-    id: "3",
-    text: "Add voice recording controls",
-    completed: true,
-    createdAt: "2024-04-18",
-    dueDate: "2024-04-20",
-    priority: "low"
-  }
-];
+    const handleToggleTodo = (id: string) => {
+        dispatch(toggleTodo(id));
+    };
 
-const Todos = () => {
-  const dimension = getWindowDimens();
-  const [todos, setTodos] = useState<TodoItem[]>(mockTodos);
-  const [newTodo, setNewTodo] = useState("");
+    const getPriorityColor = (priority: string) => {
+        switch (priority) {
+            case 'high':
+                return '#d32f2f';
+            case 'medium':
+                return '#f57c00';
+            case 'low':
+                return '#388e3c';
+            default:
+                return '#666';
+        }
+    };
 
-  const toggleTodo = (id: string) => {
-    setTodos(todos.map(todo => 
-      todo.id === id ? { ...todo, completed: !todo.completed } : todo
-    ));
-  };
+    const formatDate = (dateString: string) => {
+        return new Date(dateString).toLocaleDateString();
+    };
 
-  const addTodo = () => {
-    if (newTodo.trim()) {
-      const newTodoItem: TodoItem = {
-        id: Date.now().toString(),
-        text: newTodo.trim(),
-        completed: false,
-        createdAt: new Date().toISOString().split('T')[0],
-        priority: 'medium'
-      };
-      setTodos([...todos, newTodoItem]);
-      setNewTodo("");
-    }
-  };
+    return (
+        <Container>
+            <LinearGradient
+                colors={['#f8f9fa', '#ffffff']}
+                style={{ flex: 1 }}
+            >
+                <ScreenHeader title="All Todos" />
 
-  return (
-    <Container>
-      <ScreenHeader title="To-Do List" />
-      
-      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-        <View style={{ flex: 1 }}>
-          <ThemedInput
-            value={newTodo}
-            onChangeText={setNewTodo}
-            label="Add a new task"
-            mode="outlined"
-            returnKeyType="done"
-            onSubmitEditing={addTodo}
-          />
-        </View>
-        <IconButton
-          icon="plus"
-          size={24}
-          onPress={addTodo}
-        />
-      </View>
+                <FlatList
+                    data={todos}
+                    keyExtractor={(item) => 'id' in item ? item.id : ''}
+                    contentContainerStyle={styles.listContainer}
+                    renderItem={({ item }) => {
+                        if ('message' in item) return null;
+                        
+                        return (
+                            <TouchableOpacity 
+                                style={styles.todoItem}
+                                onPress={() => handleToggleTodo(item.id)}
+                            >
+                                <View style={styles.todoHeader}>
+                                    <View style={styles.titleContainer}>
+                                        <Icon 
+                                            name={item.completed ? "checkmark-circle" : "ellipse-outline"} 
+                                            size={24} 
+                                            color={item.completed ? "#4CAF50" : "#666"} 
+                                        />
+                                        <SmallThemedSubtitle
+                                            dimension={dimension}
+                                            text={item.text}
+                                            style={[
+                                                styles.todoText,
+                                                item.completed && styles.completedText
+                                            ]}
+                                        />
+                                    </View>
+                                    <View style={[
+                                        styles.priorityBadge,
+                                        { backgroundColor: `${getPriorityColor(item.priority)}20` }
+                                    ]}>
+                                        <SmallThemedSubtitle
+                                            dimension={dimension}
+                                            text={item.priority}
+                                            color={getPriorityColor(item.priority)}
+                                            style={{ textTransform: 'capitalize' }}
+                                        />
+                                    </View>
+                                </View>
 
-      <Spacer direction="vertical" size={16} />
-
-      <FlatList
-        data={todos}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <TodoItem
-            id={item.id}
-            text={item.text}
-            completed={item.completed}
-            dueDate={item.dueDate}
-            priority={item.priority}
-            dimension={dimension}
-            onToggle={toggleTodo}
-          />
-        )}
-      />
-    </Container>
-  );
+                                <View style={styles.todoFooter}>
+                                    <View style={styles.dateContainer}>
+                                        <Icon name="calendar-outline" size={16} color="#666" />
+                                        <SmallThemedSubtitle
+                                            dimension={dimension}
+                                            text={`Created: ${formatDate(item.createdAt)}`}
+                                            color="#666"
+                                            style={styles.dateText}
+                                        />
+                                    </View>
+                                    {item.dueDate && (
+                                        <View style={styles.dateContainer}>
+                                            <Icon name="time-outline" size={16} color="#666" />
+                                            <SmallThemedSubtitle
+                                                dimension={dimension}
+                                                text={`Due: ${formatDate(item.dueDate)}`}
+                                                color="#666"
+                                                style={styles.dateText}
+                                            />
+                                        </View>
+                                    )}
+                                </View>
+                            </TouchableOpacity>
+                        );
+                    }}
+                    ListEmptyComponent={
+                        !loading ? (
+                            <View style={styles.emptyContainer}>
+                                <Icon name="list-outline" size={48} color="#888" />
+                                <SmallThemedSubtitle
+                                    dimension={dimension}
+                                    text="No todos found"
+                                    color="#888"
+                                    style={styles.emptyText}
+                                />
+                            </View>
+                        ) : null
+                    }
+                />
+            </LinearGradient>
+        </Container>
+    );
 };
 
-export default Todos; 
+const styles = StyleSheet.create({
+    listContainer: {
+        padding: 16,
+    },
+    todoItem: {
+        backgroundColor: '#ffffff',
+        padding: 16,
+        borderRadius: 12,
+        marginBottom: 12,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+    },
+    todoHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 12,
+    },
+    titleContainer: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+    },
+    todoText: {
+        flex: 1,
+        fontSize: 16,
+        textAlign: 'left',
+    },
+    completedText: {
+        textDecorationLine: 'line-through',
+        color: '#888',
+    },
+    priorityBadge: {
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 20,
+    },
+    todoFooter: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        borderTopWidth: 1,
+        borderTopColor: '#f0f0f0',
+        paddingTop: 12,
+    },
+    dateContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+    },
+    dateText: {
+        fontSize: 12,
+    },
+    errorContainer: {
+        margin: 16,
+        padding: 12,
+        backgroundColor: 'rgba(211, 47, 47, 0.1)',
+        borderRadius: 8,
+        borderLeftWidth: 4,
+        borderLeftColor: '#d32f2f',
+    },
+    emptyContainer: {
+        alignItems: 'center',
+        marginTop: 40,
+        padding: 20,
+    },
+    emptyText: {
+        marginTop: 12,
+    },
+});
+
+export default TodosScreen; 
